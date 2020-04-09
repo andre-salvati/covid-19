@@ -4,6 +4,7 @@
  - Compare relevant countries with brazilian states
  
 Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy"
+
 Last update: April 8th
 
 # Confirmed
