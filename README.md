@@ -1,10 +1,9 @@
 # Goals
  
  - Track Covid-19 evolution (confirmed cases, deaths and mortality rates).
- - Compare relevant countries with brazilian states
- 
-  Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
-  
+ - Compare relevant countries with Brazil and/or its states
+ - Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
+
   Last update: April 8th
 
 # Confirmed
