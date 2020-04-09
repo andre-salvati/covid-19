@@ -132,7 +132,7 @@ mundo %>% filter(grepl(countries, location)) %>%
           my_blob +
           log_scale +
           #coord_cartesian(xlim = c(0,30)) +
-          labs(title = "Confirmed cases (D == 0 when cases > 100)", x = "D (Day)", y = "Confirmed (logarithmic scale)") +
+          labs(title = "Confirmed cases (D = 0 when cases > 100)", x = "D (Day)", y = "Confirmed (logarithmic scale)") +
           my_caption
 
 
@@ -186,8 +186,8 @@ mundo %>% filter(source == "university") %>%
           my_caption
 
 mundo %>% filter(date > as.Date("2020-03-10")) %>%
-          #filter(grepl(countries, location)) %>%
-          filter(grepl("SP|MG|RJ|RJ|AM|CE|PE", location)) %>%
+          filter(grepl(countries, location)) %>%
+          #filter(grepl("SP|MG|RJ|RJ|AM|CE|PE", location)) %>%
           #filter(total_deaths > 50) %>%
           mutate(mortality = (total_deaths / total_cases) *100) %>% 
           filter(!is.na(mortality)) %>%
