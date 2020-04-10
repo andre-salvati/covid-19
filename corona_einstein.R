@@ -12,13 +12,13 @@ library(janitor)
 # library(randomcoloR)
 # library(gghighlight)
 
-setwd("~/Desktop/corona")
+setwd("~/Desktop/covid_19")
 options("scipen"=100, digits = 4)
 texto45 = theme(axis.text.x=element_text(angle=45, hjust=1))
 theme_set(theme_minimal())
 
 
-casos = read_excel("casos.xlsx") %>% clean_names()
+casos = read_excel("./data/casos_einstein.xlsx") %>% clean_names()
 
 str(casos)
 names(casos)

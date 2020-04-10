@@ -25,14 +25,12 @@ my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
                    labs(caption = "Sources: Johns Hopkins University and Brazilian Ministry of Wealthy"))
 
 
-
-
-# Ingestion Ministério da Saúde ------------------
+# Ingestion Ministry of Wealthy ------------------
 
 minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-arquivo = "Covid19 Brasil Time Series.xlsx"
+arquivo = "./data/ministry_of_wealthy.xlsx"
 
-drive_download(as_id(minha_planilha), overwrite = TRUE)
+drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
 confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>% 
               gather(X__1, valor, -X__2, -X__1) %>%
               rename(location = X__2, date = X__1, total= valor) %>%
@@ -119,7 +117,7 @@ mundo %>% filter(grepl(countries, location)) %>%
           ggplot(aes(date, total_cases, color = location)) +
           my_blob +
           log_scale +
-          labs(title = "Confirmed cases (by country)", y = "Confirmed (logarithmic scale)")  +
+          labs(title = "Confirmed cases (by country/states)", y = "Confirmed (logarithmic scale)")  +
           my_caption
 
 
