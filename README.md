@@ -2,9 +2,10 @@
  
  - Track Covid-19 evolution (confirmed cases, deaths and mortality rates).
  - Compare relevant countries with Brazil and/or its states
- - Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
-
-  Last update: April 8th
+ 
+  Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
+  
+  Last update: April 9th
 
 # Confirmed
 
@@ -23,4 +24,5 @@
 ![](img/mortality_total.png) 
 ![](img/mortality_detail.png)
 
+![](img/mortality_brazil.png)
 

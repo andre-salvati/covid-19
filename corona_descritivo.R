@@ -102,7 +102,7 @@ countries = "Brazil|SP|RJ|United States|Italy|Spain|Iran|China|France|United Kin
 
 # Confirmed ------------------
 
-mundo %>% filter(source == "university") %>% 
+a = mundo %>% filter(source == "university") %>% 
           group_by(date) %>%
           summarise(total_cases = sum(total_cases)) %>%
           ggplot(aes(date, total_cases)) +
@@ -111,8 +111,9 @@ mundo %>% filter(source == "university") %>%
           labs(title = "Confirmed cases (total)", y = "Confirmed") +
           my_caption
 
+a
 
-mundo %>% filter(grepl(countries, location)) %>%
+b = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_cases > 100) %>%
           ggplot(aes(date, total_cases, color = location)) +
           my_blob +
@@ -120,8 +121,10 @@ mundo %>% filter(grepl(countries, location)) %>%
           labs(title = "Confirmed cases (by country/states)", y = "Confirmed (logarithmic scale)")  +
           my_caption
 
+b
 
-mundo %>% filter(grepl(countries, location)) %>%
+
+c = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_cases > 200) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
@@ -133,10 +136,12 @@ mundo %>% filter(grepl(countries, location)) %>%
           labs(title = "Confirmed cases (D = 0 when cases > 100)", x = "D (Day)", y = "Confirmed (logarithmic scale)") +
           my_caption
 
+c
+
 
 # Deaths ------------------
 
-mundo %>%
+d = mundo %>%
         filter(source == "university") %>% 
         group_by(date) %>%
         summarise(total_deaths = sum(total_deaths)) %>%
@@ -146,8 +151,9 @@ mundo %>%
         labs(title = "Death cases (total)", y = "Deaths") +
         my_caption
 
+d
 
-mundo %>% filter(date > as.Date("2020-02-15")) %>%
+e = mundo %>% filter(date > as.Date("2020-02-15")) %>%
           filter(total_deaths > 5) %>%
           filter(grepl(countries, location)) %>%
           ggplot(aes(date, total_deaths, color = location)) +
@@ -156,8 +162,9 @@ mundo %>% filter(date > as.Date("2020-02-15")) %>%
           labs(title = "Death cases (by country/state)", y = "Deaths (logarithmic scale)") +
           my_caption
 
+e
 
-mundo %>% filter(grepl(countries, location)) %>%
+f = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_deaths > 10) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
@@ -166,13 +173,14 @@ mundo %>% filter(grepl(countries, location)) %>%
           my_blob +
           log_scale +
           #coord_cartesian(xlim=c(0,20)) +
-          labs(title = "Death cases (D == 0 when cases > 10)", y = "Deaths (logarithmic scale)") +
+          labs(title = "Death cases (D = 0 when cases > 10)", y = "Deaths (logarithmic scale)") +
           my_caption
 
+f
 
 # Mortality Rate ------------------
 
-mundo %>% filter(source == "university") %>%  
+g = mundo %>% filter(source == "university") %>%  
           group_by(date) %>%
           summarise(total_deaths = sum(total_deaths, na.rm = TRUE), total_cases = sum(total_cases, na.rm = TRUE)) %>%
           mutate(mortality = (total_deaths / total_cases)*100) %>% 
@@ -183,10 +191,10 @@ mundo %>% filter(source == "university") %>%
           labs(title = "Mortality rate (total)", y = "Mortality rate (%)") +
           my_caption
 
-mundo %>% filter(date > as.Date("2020-03-10")) %>%
+g
+
+i = mundo %>% filter(date > as.Date("2020-03-10")) %>%
           filter(grepl(countries, location)) %>%
-          #filter(grepl("SP|MG|RJ|RJ|AM|CE|PE", location)) %>%
-          #filter(total_deaths > 50) %>%
           mutate(mortality = (total_deaths / total_cases) *100) %>% 
           filter(!is.na(mortality)) %>%
           ggplot(aes(date, mortality, color = location)) +
@@ -194,4 +202,30 @@ mundo %>% filter(date > as.Date("2020-03-10")) %>%
           labs(title = "Mortality rate (by country/state)", y = "Mortality rate (%)") +
           my_caption
 
+i
+
+
+j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
+  filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE", location)) %>%
+  mutate(mortality = (total_deaths / total_cases) *100) %>% 
+  filter(!is.na(mortality)) %>%
+  ggplot(aes(date, mortality, color = location)) +
+  my_blob +
+  labs(title = "Mortality rate (Brazil)", y = "Mortality rate (%)") +
+  my_caption
+
+j
+
+w_ = 15
+h_ = 7
+
+ggsave(a, filename = "./img/confirmed_total.png", width = w_, height = h_)
+ggsave(b, filename = "./img/confirmed_detail.png", width = w_, height = h_)
+ggsave(c, filename = "./img/confirmed_compare.png", width = w_, height = h_)
+ggsave(d, filename = "./img/deaths_total.png", width = w_, height = h_)
+ggsave(e, filename = "./img/deaths_detail.png", width = w_, height = h_)
+ggsave(f, filename = "./img/deaths_compare.png", width = w_, height = h_)
+ggsave(g, filename = "./img/mortality_total.png", width = w_, height = h_)
+ggsave(i, filename = "./img/mortality_detail.png", width = w_, height = h_)
+ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
 
