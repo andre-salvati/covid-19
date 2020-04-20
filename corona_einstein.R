@@ -49,8 +49,10 @@ fit <- rpart(sars_cov_2_exam_result ~ ., method="class", data=casos, parms = lis
 pred = predict(fit, type="class")
 table(pred, casos$sars_cov_2_exam_result)
 
-rpart.plot(fit, box.palette = "GnYlRd")
+(4962+64)/(4962+64+494+124)
 
+rpart.plot(fit, box.palette = "GnYlRd")
+  
 casos %>% count(sars_cov_2_exam_result)
 casos %>% filter(patient_age_quantile >= 3 & (leukocytes < -0.52)) %>% count(sars_cov_2_exam_result)
 

@@ -5,7 +5,10 @@
  
   Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
   
-  Last update: April 9th
+  Last update: April 20th
+
+  Please, refer to [this dashboard] (https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
+
 
 # Confirmed
 
@@ -19,7 +22,11 @@
 ![](img/deaths_detail.png)
 ![](img/deaths_compare.png) 
 
-# Mortality Rate
+![](img/deaths_new.png)
+
+![](img/deaths_new_brazil.png) 
+
+# Mortality Rate (Deaths / Cases)
 
 ![](img/mortality_total.png) 
 ![](img/mortality_detail.png)

@@ -56,7 +56,6 @@ brasil %>% filter(location == "SP") %>% tail
 
 # Ingestion Johns Hopkins --------
 
-
 mundo_obitos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv", 
                         check.names=FALSE, stringsAsFactors = FALSE) %>%
                rename(location = `Country/Region`) %>%
@@ -83,8 +82,6 @@ mundo_casos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-1
                      campo = "total_cases") %>%
               ungroup
 
-str(mundo_casos)
-
 mundo = rbind(mundo_casos, mundo_obitos) %>% 
         mutate(source = "university") %>%
         spread(campo, total) %>% rbind(brasil)
@@ -98,7 +95,7 @@ sort(unique(mundo$location))
 
 log_scale = scale_y_continuous(trans='log10', labels = scales::comma)
 
-countries = "Brazil|SP|RJ|United States|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Egypt|Japan|Korea|Turkey"
+countries = "Brazil|SP|RJ|United States|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Egypt|Japan|Korea|Turkey"
 
 # Confirmed ------------------
 
@@ -168,7 +165,7 @@ f = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_deaths > 10) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
-          filter(dia < 30) %>%
+          filter(dia < 40) %>%
           ggplot(aes(dia, total_deaths, color = location)) +
           my_blob +
           log_scale +
@@ -177,6 +174,28 @@ f = mundo %>% filter(grepl(countries, location)) %>%
           my_caption
 
 f
+
+k = mundo %>% filter(grepl(countries, location)) %>%
+          group_by(location) %>%
+          mutate(deaths = total_deaths - lag(total_deaths)) %>% 
+          ggplot(aes(date, deaths, color = location)) +
+          my_blob +
+          log_scale +
+          labs(title = "Death cases (new)", y = "Deaths (logarithmic scale)") +
+          my_caption
+
+k
+
+l = mundo %>% filter(source == "ministry") %>%
+          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE", location)) %>%
+          mutate(deaths = total_deaths - lag(total_deaths)) %>% 
+          ggplot(aes(date, deaths, color = location)) +
+          my_blob +
+          log_scale +
+          labs(title = "Death cases (new)", y = "Deaths (logarithmic scale)") +
+          my_caption
+
+l
 
 # Mortality Rate ------------------
 
@@ -215,7 +234,7 @@ j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
   my_caption
 
 j
-
+     
 w_ = 15
 h_ = 7
 
@@ -225,7 +244,22 @@ ggsave(c, filename = "./img/confirmed_compare.png", width = w_, height = h_)
 ggsave(d, filename = "./img/deaths_total.png", width = w_, height = h_)
 ggsave(e, filename = "./img/deaths_detail.png", width = w_, height = h_)
 ggsave(f, filename = "./img/deaths_compare.png", width = w_, height = h_)
+ggsave(k, filename = "./img/deaths_new.png", width = w_, height = h_)
+ggsave(l, filename = "./img/deaths_new_brazil.png", width = w_, height = h_)
 ggsave(g, filename = "./img/mortality_total.png", width = w_, height = h_)
 ggsave(i, filename = "./img/mortality_detail.png", width = w_, height = h_)
 ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
 
+
+# Cities --------------------
+
+cities = read.csv("./data/cases-brazil-cities-time.csv")
+
+cities %>% filter(state == "SP") %>%
+           filter(grepl("São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas", city)) %>%
+           group_by(city) %>%
+           arrange(date, .by_group = TRUE) %>%
+           summarise(date = last(date),
+                     deaths = last(deaths),
+                     totalCases = last(totalCases)) %>%
+           arrange(-totalCases) %>% View
