@@ -7,7 +7,7 @@
   
   Last update: April 20th
 
-  Please, refer to [this dashboard] (https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
+  Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
 
 
 # Confirmed
