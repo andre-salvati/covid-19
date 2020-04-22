@@ -95,7 +95,7 @@ sort(unique(mundo$location))
 
 log_scale = scale_y_continuous(trans='log10', labels = scales::comma)
 
-countries = "Brazil|SP|RJ|United States|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Egypt|Japan|Korea|Turkey"
+countries = "Brazil|SP|RJ|United States|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Japan|Korea|Turkey"
 
 # Confirmed ------------------
 
@@ -105,7 +105,7 @@ a = mundo %>% filter(source == "university") %>%
           ggplot(aes(date, total_cases)) +
           geom_point() +
           geom_smooth(se = FALSE) + 
-          labs(title = "Confirmed cases (total)", y = "Confirmed") +
+          labs(title = "Confirmed cases (global)", y = "Confirmed") +
           my_caption
 
 a
@@ -145,7 +145,7 @@ d = mundo %>%
         ggplot(aes(date, total_deaths)) +
         geom_point() +
         geom_smooth(se = FALSE) + 
-        labs(title = "Death cases (total)", y = "Deaths") +
+        labs(title = "Death cases (global)", y = "Deaths") +
         my_caption
 
 d
@@ -165,12 +165,12 @@ f = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_deaths > 10) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
-          filter(dia < 40) %>%
+          filter(dia < 50) %>%
           ggplot(aes(dia, total_deaths, color = location)) +
           my_blob +
           log_scale +
           #coord_cartesian(xlim=c(0,20)) +
-          labs(title = "Death cases (D = 0 when cases > 10)", y = "Deaths (logarithmic scale)") +
+          labs(title = "Death cases (D = 0 when cases > 10)", x = "D (Day)", y = "Deaths (logarithmic scale)") +
           my_caption
 
 f
@@ -181,18 +181,18 @@ k = mundo %>% filter(grepl(countries, location)) %>%
           ggplot(aes(date, deaths, color = location)) +
           my_blob +
           log_scale +
-          labs(title = "Death cases (new)", y = "Deaths (logarithmic scale)") +
+          labs(title = "New death cases", y = "Deaths (logarithmic scale)") +
           my_caption
 
 k
 
-l = mundo %>% filter(source == "ministry") %>%
-          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE", location)) %>%
+l = mundo %>% filter(source == "ministry") %>% 
+          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR", location)) %>%
           mutate(deaths = total_deaths - lag(total_deaths)) %>% 
           ggplot(aes(date, deaths, color = location)) +
           my_blob +
           log_scale +
-          labs(title = "Death cases (new)", y = "Deaths (logarithmic scale)") +
+          labs(title = "New death cases (Brazil)", y = "Deaths (logarithmic scale)") +
           my_caption
 
 l
@@ -207,7 +207,7 @@ g = mundo %>% filter(source == "university") %>%
           ggplot(aes(date, mortality)) +
           geom_point() +
           geom_smooth(se = FALSE) +
-          labs(title = "Mortality rate (total)", y = "Mortality rate (%)") +
+          labs(title = "Mortality rate (global)", y = "Mortality rate (%)") +
           my_caption
 
 g
@@ -253,13 +253,13 @@ ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
 
 # Cities --------------------
 
-cities = read.csv("./data/cases-brazil-cities-time.csv")
 
-cities %>% filter(state == "SP") %>%
-           filter(grepl("São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas", city)) %>%
-           group_by(city) %>%
-           arrange(date, .by_group = TRUE) %>%
-           summarise(date = last(date),
-                     deaths = last(deaths),
-                     totalCases = last(totalCases)) %>%
-           arrange(-totalCases) %>% View
+read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
+        filter(state == "SP") %>%
+        filter(grepl("Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú", city)) %>%
+        group_by(city) %>%
+        arrange(date, .by_group = TRUE) %>%
+        summarise(date = last(date),
+                  deaths = last(deaths),
+                  totalCases = last(totalCases)) %>%
+        arrange(-totalCases) %>% View
