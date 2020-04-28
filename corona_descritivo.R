@@ -32,15 +32,15 @@ arquivo = "./data/ministry_of_wealthy.xlsx"
 
 drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
 confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>% 
-              gather(X__1, valor, -X__2, -X__1) %>%
-              rename(location = X__2, date = X__1, total= valor) %>%
+              gather("...1", valor, -"...2", -"...1") %>%
+              rename(location = "...2", date = "...1", total= valor) %>%
               mutate(campo = "total_cases")
 str(confirmados)
 
 obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
-              gather(X__1, valor, -X__2, -X__1) %>%
-              rename(location = X__2, date = X__1, total = valor) %>%
-              mutate(campo = "total_deaths")
+         gather("...1", valor, -"...2", -"...1") %>%
+         rename(location = "...2", date = "...1", total= valor) %>%
+         mutate(campo = "total_deaths")
 str(obitos)
 
 brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
