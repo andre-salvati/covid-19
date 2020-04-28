@@ -1,20 +1,17 @@
 # Goals
   
-  - Track Covid-19 evolution (confirmed cases, deaths and mortality rates).
-   
-  - Compare relevant countries with Brazil and its states
-    
-    \
-    
-    Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
-    
-    Updated until April 21, 2020
-  
-    Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
+* Track Covid-19 evolution (confirmed cases, deaths and mortality rates). 
 
-    \
+* Compare relevant countries with Brazil and its states
+<br/><br/>
 
+Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
 
+Updated until **April 21, 2020**
+
+Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
+        
+    
 # Confirmed
 
 ![](img/confirmed_total.png) 
