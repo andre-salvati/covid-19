@@ -18,8 +18,6 @@ theme_set(theme_minimal())
 # library(covid19br)
 # unique(covid_states$date)
 
-
-
 my_blob =  list(
   geom_point(),
   geom_line(alpha = 0),
@@ -45,32 +43,32 @@ sort(unique(brasil$date))
 
 brasil %>% arrange(date) %>% tail(30)
 
-# 
-# 
-# minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-# arquivo = "./data/ministry_of_wealthy.xlsx"
-# 
-# drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
-# confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>% 
-#               gather("...1", valor, -"...2", -"...1") %>%
-#               rename(location = "...2", date = "...1", total= valor) %>%
-#               mutate(campo = "total_cases")
-# str(confirmados)
-# 
-# obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
-#          gather("...1", valor, -"...2", -"...1") %>%
-#          rename(location = "...2", date = "...1", total= valor) %>%
-#          mutate(campo = "total_deaths")
-# str(obitos)
-# 
-# brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
-#          mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
-#          filter(!is.na(total_cases)) %>%
-#          mutate(source = "ministry")
-#       
-# unique((brasil$date))
-# 
-# brasil %>% filter(location == "SP") %>% tail
+
+
+minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
+arquivo = "./data/ministry_of_wealthy.xlsx"
+
+drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
+confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>%
+              gather("...1", valor, -"...2", -"...1") %>%
+              rename(location = "...2", date = "...1", total= valor) %>%
+              mutate(campo = "total_cases")
+str(confirmados)
+
+obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
+         gather("...1", valor, -"...2", -"...1") %>%
+         rename(location = "...2", date = "...1", total= valor) %>%
+         mutate(campo = "total_deaths")
+str(obitos)
+
+brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
+         mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
+         filter(!is.na(total_cases)) %>%
+         mutate(source = "ministry")
+
+unique((brasil$date))
+
+brasil %>% filter(location == "SP") %>% tail
 
 
 
@@ -150,7 +148,7 @@ c = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_cases > 200) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
-          filter(dia < 50) %>%
+          filter(dia < 70) %>%
           ggplot(aes(dia, total_cases, color = location)) +
           my_blob +
           log_scale +
@@ -190,7 +188,7 @@ f = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_deaths > 10) %>%
           group_by(location) %>%
           mutate(dia = row_number()) %>%
-          filter(dia < 50) %>%
+          filter(dia < 70) %>%
           ggplot(aes(dia, total_deaths, color = location)) +
           my_blob +
           log_scale +
