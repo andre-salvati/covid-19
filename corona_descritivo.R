@@ -13,6 +13,13 @@ options("scipen"=100, digits = 4)
 texto45 = theme(axis.text.x=element_text(angle=45, hjust=1))
 theme_set(theme_minimal())
 
+# install.packages("devtools") 
+# devtools::install_github(repo = "paternogbc/covid19br")
+# library(covid19br)
+# unique(covid_states$date)
+
+
+
 my_blob =  list(
   geom_point(),
   geom_line(alpha = 0),
@@ -27,30 +34,43 @@ my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
 
 # Ingestion Ministry of Wealthy ------------------
 
-minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-arquivo = "./data/ministry_of_wealthy.xlsx"
+library(coronabr)
+dados <- get_corona_br(by_uf = TRUE)
 
-drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
-confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>% 
-              gather("...1", valor, -"...2", -"...1") %>%
-              rename(location = "...2", date = "...1", total= valor) %>%
-              mutate(campo = "total_cases")
-str(confirmados)
+brasil = dados %>% filter(place_type == "state") %>% 
+          select(location = state, date, total_cases = confirmed, total_deaths = deaths) %>%
+          mutate(source = "ministry")
 
-obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
-         gather("...1", valor, -"...2", -"...1") %>%
-         rename(location = "...2", date = "...1", total= valor) %>%
-         mutate(campo = "total_deaths")
-str(obitos)
+sort(unique(brasil$date))
 
-brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
-         mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
-         filter(!is.na(total_cases)) %>%
-         mutate(source = "ministry")
-      
-unique((brasil$date))
+brasil %>% arrange(date) %>% tail(30)
 
-brasil %>% filter(location == "SP") %>% tail
+# 
+# 
+# minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
+# arquivo = "./data/ministry_of_wealthy.xlsx"
+# 
+# drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
+# confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>% 
+#               gather("...1", valor, -"...2", -"...1") %>%
+#               rename(location = "...2", date = "...1", total= valor) %>%
+#               mutate(campo = "total_cases")
+# str(confirmados)
+# 
+# obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
+#          gather("...1", valor, -"...2", -"...1") %>%
+#          rename(location = "...2", date = "...1", total= valor) %>%
+#          mutate(campo = "total_deaths")
+# str(obitos)
+# 
+# brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
+#          mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
+#          filter(!is.na(total_cases)) %>%
+#          mutate(source = "ministry")
+#       
+# unique((brasil$date))
+# 
+# brasil %>% filter(location == "SP") %>% tail
 
 
 
@@ -82,20 +102,25 @@ mundo_casos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-1
                      campo = "total_cases") %>%
               ungroup
 
+
 mundo = rbind(mundo_casos, mundo_obitos) %>% 
         mutate(source = "university") %>%
-        spread(campo, total) %>% rbind(brasil)
+        spread(campo, total) %>% 
+        rbind(brasil %>% arrange(date))
+
+#View(mundo)
 
 mundo %>% filter(location == "Brazil") %>% arrange(date) %>% tail
-mundo %>% filter(location == "BR") %>% arrange(date) %>% tail
-mundo %>% filter(location == "US") %>% arrange(date) %>% tail
+mundo %>% filter(location == "SP") %>% arrange(date) %>% tail
 
 sort(unique(mundo$date))
 sort(unique(mundo$location))
 
 log_scale = scale_y_continuous(trans='log10', labels = scales::comma)
 
-countries = "Brazil|SP|RJ|United States|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Japan|Korea|Turkey"
+countries = "Brazil|SP|RJ|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Japan|Korea|Turkey|Russia"
+#countries = "Brazil|SP|RJ|United Kingdom|Australia|US|Canada|Belgium|Switzerland|Netherlands"
+
 
 # Confirmed ------------------
 
@@ -125,7 +150,7 @@ c = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_cases > 200) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
-          filter(dia < 40) %>%
+          filter(dia < 50) %>%
           ggplot(aes(dia, total_cases, color = location)) +
           my_blob +
           log_scale +
@@ -149,10 +174,10 @@ d = mundo %>%
         my_caption
 
 d
-
+          
 e = mundo %>% filter(date > as.Date("2020-02-15")) %>%
           filter(total_deaths > 5) %>%
-          filter(grepl(countries, location)) %>%
+          filter(grepl(countries, location)) %>% 
           ggplot(aes(date, total_deaths, color = location)) +
           my_blob +
           log_scale +
@@ -163,7 +188,7 @@ e
 
 f = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_deaths > 10) %>%
-          group_by(location) %>% 
+          group_by(location) %>%
           mutate(dia = row_number()) %>%
           filter(dia < 50) %>%
           ggplot(aes(dia, total_deaths, color = location)) +
@@ -187,7 +212,8 @@ k = mundo %>% filter(grepl(countries, location)) %>%
 k
 
 l = mundo %>% filter(source == "ministry") %>% 
-          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR", location)) %>%
+          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR|MA", location)) %>%
+          group_by(location) %>%
           mutate(deaths = total_deaths - lag(total_deaths)) %>% 
           ggplot(aes(date, deaths, color = location)) +
           my_blob +
