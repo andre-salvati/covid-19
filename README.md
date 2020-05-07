@@ -5,7 +5,7 @@
 * Compare relevant countries with Brazil and its states
 <br/><br/>
 
-Data Sources: Johns Hopkins University and Brazilian Ministry of Wealthy
+Data Sources: Johns Hopkins University and Brazilian Ministry of Health
 
 Updated until **May 4, 2020**
 

@@ -27,10 +27,10 @@ my_blob =  list(
 )
 
 my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
-                   labs(caption = "Sources: Johns Hopkins University and Brazilian Ministry of Wealthy"))
+                   labs(caption = "Sources: Johns Hopkins University and Brazilian Ministry of Health"))
 
 
-# Ingestion Ministry of Wealthy ------------------
+# Ingestion Ministry of Healthy ------------------
 
 library(coronabr)
 dados <- get_corona_br(by_uf = TRUE)
@@ -45,31 +45,31 @@ brasil %>% arrange(date) %>% tail(30)
 
 
 
-minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-arquivo = "./data/ministry_of_wealthy.xlsx"
-
-drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
-confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>%
-              gather("...1", valor, -"...2", -"...1") %>%
-              rename(location = "...2", date = "...1", total= valor) %>%
-              mutate(campo = "total_cases")
-str(confirmados)
-
-obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
-         gather("...1", valor, -"...2", -"...1") %>%
-         rename(location = "...2", date = "...1", total= valor) %>%
-         mutate(campo = "total_deaths")
-str(obitos)
-
-brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
-         mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
-         filter(!is.na(total_cases)) %>%
-         mutate(source = "ministry")
-
-unique((brasil$date))
-
-brasil %>% filter(location == "SP") %>% tail
-
+# minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
+# arquivo = "./data/ministry_of_healthy.xlsx"
+# 
+# drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
+# confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>%
+#               gather("...1", valor, -"...2", -"...1") %>%
+#               rename(location = "...2", date = "...1", total= valor) %>%
+#               mutate(campo = "total_cases")
+# str(confirmados)
+# 
+# obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
+#          gather("...1", valor, -"...2", -"...1") %>%
+#          rename(location = "...2", date = "...1", total= valor) %>%
+#          mutate(campo = "total_deaths")
+# str(obitos)
+# 
+# brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
+#          mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
+#          filter(!is.na(total_cases)) %>%
+#          mutate(source = "ministry")
+# 
+# unique((brasil$date))
+# 
+# brasil %>% filter(location == "SP") %>% tail
+# 
 
 
 # Ingestion Johns Hopkins --------
@@ -260,7 +260,7 @@ j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
 j
      
 w_ = 15
-h_ = 7
+h_ = 10
 
 ggsave(a, filename = "./img/confirmed_total.png", width = w_, height = h_)
 ggsave(b, filename = "./img/confirmed_detail.png", width = w_, height = h_)
@@ -287,3 +287,7 @@ read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-
                   deaths = last(deaths),
                   totalCases = last(totalCases)) %>%
         arrange(-totalCases) %>% View
+
+read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
+  filter(grepl("Jundiaí", city)) %>%
+  arrange(date) %>% select(date, totalCases, deaths)
