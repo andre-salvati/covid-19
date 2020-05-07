@@ -30,7 +30,7 @@ my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
                    labs(caption = "Sources: Johns Hopkins University and Brazilian Ministry of Health"))
 
 
-# Ingestion Ministry of Healthy ------------------
+# Ingestion Ministry of Health ------------------
 
 library(coronabr)
 dados <- get_corona_br(by_uf = TRUE)
@@ -46,7 +46,7 @@ brasil %>% arrange(date) %>% tail(30)
 
 
 # minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-# arquivo = "./data/ministry_of_healthy.xlsx"
+# arquivo = "./data/ministry_of_health.xlsx"
 # 
 # drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
 # confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>%
