@@ -7,7 +7,7 @@
 
 Data Sources: Johns Hopkins University and Brazilian Ministry of Health
 
-Updated until **May 4, 2020**
+Updated until **May 13, 2020**
 
 Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
         

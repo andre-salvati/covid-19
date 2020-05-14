@@ -6,6 +6,7 @@ library(janitor)
 library(googledrive)
 library(randomcoloR)
 library(gghighlight)
+library(coronabr)
 
 
 setwd("~/Desktop/covid_19")
@@ -23,7 +24,7 @@ my_blob =  list(
   geom_line(alpha = 0),
   geom_smooth(se = FALSE),
   gghighlight(TRUE,  label_key = location, use_direct_label = TRUE,
-              label_params = list(segment.color = NA, nudge_x = 1))
+              label_params = list(segment.color = NA, nudge_x = 1, size = 3))
 )
 
 my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
@@ -32,7 +33,6 @@ my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
 
 # Ingestion Ministry of Health ------------------
 
-library(coronabr)
 dados <- get_corona_br(by_uf = TRUE)
 
 brasil = dados %>% filter(place_type == "state") %>% 
@@ -117,6 +117,7 @@ sort(unique(mundo$location))
 log_scale = scale_y_continuous(trans='log10', labels = scales::comma)
 
 countries = "Brazil|SP|RJ|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Japan|Korea|Turkey|Russia"
+#countries = "Switzerland|Sweden|Luxembourg|Finland|Denmark|Germany"
 #countries = "Brazil|SP|RJ|United Kingdom|Australia|US|Canada|Belgium|Switzerland|Netherlands"
 
 
@@ -279,15 +280,21 @@ ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
 
 
 read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
-        filter(state == "SP") %>%
-        filter(grepl("Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú", city)) %>%
+        filter(state %in% c("SP","PR")) %>%
+        filter(grepl("São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel", city)) %>%
         group_by(city) %>%
         arrange(date, .by_group = TRUE) %>%
         summarise(date = last(date),
                   deaths = last(deaths),
-                  totalCases = last(totalCases)) %>%
-        arrange(-totalCases) %>% View
+                  totalCases = last(totalCases),
+                  cases_per_100k = last(totalCases_per_100k_inhabitants),
+                  deaths_per_100k = last(deaths_per_100k_inhabitants)) %>%
+        arrange(-cases_per_100k) %>% View
 
 read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
   filter(grepl("Jundiaí", city)) %>%
-  arrange(date) %>% select(date, totalCases, deaths)
+  mutate(date = as.Date(date)) %>%
+  arrange(date) %>% 
+  ggplot(aes(date, deaths)) +
+  geom_point()
+
