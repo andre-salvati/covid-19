@@ -185,8 +185,9 @@ e = mundo %>% filter(date > as.Date("2020-02-15")) %>%
 
 e
 
-f = mundo %>% filter(grepl(countries, location)) %>%
-          filter(total_deaths > 10) %>%
+
+f = mundo %>% #filter(grepl(countries, location)) %>%
+          filter(total_deaths > 10000) %>%
           group_by(location) %>%
           mutate(dia = row_number()) %>%
           filter(dia < 70) %>%
@@ -194,7 +195,7 @@ f = mundo %>% filter(grepl(countries, location)) %>%
           my_blob +
           log_scale +
           #coord_cartesian(xlim=c(0,20)) +
-          labs(title = "Death cases (D = 0 when cases > 10)", x = "D (Day)", y = "Deaths (logarithmic scale)") +
+          labs(title = "Death cases (D = 0 when cases > 10000)", x = "D (Day)", y = "Deaths (logarithmic scale)") +
           my_caption
 
 f
@@ -212,7 +213,8 @@ k
 
 l = mundo %>% filter(source == "ministry") %>% 
           filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR|MA", location)) %>%
-          group_by(location) %>%
+          #arrange(location) %>% View
+          group_by(location) %>% 
           mutate(deaths = total_deaths - lag(total_deaths)) %>% 
           ggplot(aes(date, deaths, color = location)) +
           my_blob +
@@ -250,7 +252,7 @@ i
 
 
 j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
-  filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE", location)) %>%
+  filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|MA", location)) %>%
   mutate(mortality = (total_deaths / total_cases) *100) %>% 
   filter(!is.na(mortality)) %>%
   ggplot(aes(date, mortality, color = location)) +
@@ -278,21 +280,24 @@ ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
 
 # Cities --------------------
 
+cities = read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") 
 
-read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
-        filter(state %in% c("SP","PR")) %>%
-        filter(grepl("São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel", city)) %>%
+cities %>% 
+        filter(state %in% c("SP","PR", "RJ")) %>%
+        filter(grepl("Janeiro|São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel", city)) %>%
+        #filter(grepl("Janeiro|São Paulo|Jundiaí|Campinas|Valinhos|Vinhedo|Itu|Itupeva|Sorocaba|Osasco|Barueri|Franco da Rocha", city)) %>%
         group_by(city) %>%
         arrange(date, .by_group = TRUE) %>%
         summarise(date = last(date),
                   deaths = last(deaths),
                   totalCases = last(totalCases),
+                  mortality = deaths / totalCases,
                   cases_per_100k = last(totalCases_per_100k_inhabitants),
                   deaths_per_100k = last(deaths_per_100k_inhabitants)) %>%
-        arrange(-cases_per_100k) %>% View
+        arrange(-deaths_per_100k) %>% View
 
-read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") %>% 
-  filter(grepl("Jundiaí", city)) %>%
+cities %>% 
+  filter(grepl("São Paulo/SP", city)) %>%
   mutate(date = as.Date(date)) %>%
   arrange(date) %>% 
   ggplot(aes(date, deaths)) +
