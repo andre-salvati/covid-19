@@ -3,11 +3,14 @@
 * Track Covid-19 evolution (confirmed cases, deaths and mortality rates). 
 
 * Compare relevant countries with Brazil and its states
+
+* Compare numbers from Sao Paulo city and surrounding cities.
+
 <br/><br/>
 
 Data Sources: Johns Hopkins University and Brazilian Ministry of Health
 
-Updated until **May 23, 2020**
+Updated until **May 29, 2020**
 
 Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
         
@@ -40,3 +43,9 @@ Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for
 
 ![](img/mortality_brazil.png)
 
+# Cities
+
+![](img/cities_capital.png) 
+
+
+![](img/cities.png) 

@@ -1,3 +1,7 @@
+
+# Mapa covid
+# https://juntoscontraocovid.org/map.html
+
 library(tidyverse)
 library(readxl)
 library(lubridate)
@@ -149,7 +153,7 @@ c = mundo %>% filter(grepl(countries, location)) %>%
           filter(total_cases > 200) %>%
           group_by(location) %>% 
           mutate(dia = row_number()) %>%
-          filter(dia < 70) %>%
+          filter(dia < 100) %>%
           ggplot(aes(dia, total_cases, color = location)) +
           my_blob +
           log_scale +
@@ -262,6 +266,64 @@ j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
 
 j
      
+
+
+# Cities --------------------
+
+cities = read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") 
+
+cities %>% 
+        filter(state %in% c("SP","PR", "RJ")) %>%
+        filter(grepl("Janeiro|São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel|Osasco|Campinas|São Bernardo|Diadema|Sorocaba|Jundiaí|Guarulhos|Santo André|São Caetano|Santos", city)) %>%
+        #filter(grepl("Janeiro|São Paulo|Jundiaí|Campinas|Valinhos|Vinhedo|Itu|Itupeva|Sorocaba|Osasco|Barueri|Franco da Rocha", city)) %>%
+        group_by(city) %>%
+        arrange(date, .by_group = TRUE) %>%
+        summarise(date = last(date),
+                  deaths = last(deaths),
+                  totalCases = last(totalCases),
+                  mortality = deaths / totalCases,
+                  cases_per_100k = last(totalCases_per_100k_inhabitants),
+                  deaths_per_100k = last(deaths_per_100k_inhabitants)) %>%
+        arrange(-deaths_per_100k) %>% View
+
+
+cities %>% filter(date == "2020-05-25") %>% 
+           filter(state %in% c("SP")) %>%
+           select(city, deaths) %>%
+           arrange(-deaths) %>% head
+
+sort(unique(cities$city))
+
+o = cities %>%
+  filter(city %in% c("São Paulo/SP", "Rio de Janeiro/RJ")) %>%
+  mutate(date = as.Date(date)) %>% 
+  group_by(city) %>%
+  arrange(date) %>% 
+  mutate(deaths = deaths - lag(deaths)) %>% 
+  select(city, date, deaths) %>%
+  ggplot(aes(date, deaths), fill = city) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(city ~ ., ncol = 2)
+
+o
+
+p = cities %>%
+    filter(state %in% c("SP")) %>%
+    filter(grepl("Osasco|Campinas|São Bernardo|Diadema|Sorocaba|Jundiaí|Guarulhos|Santo André|São Caetano|Santos", city)) %>%
+    #filter(grepl("Sorocaba|Bauru|Limeira|Campinas|Piracicaba|São Carlos|Rio Claro|Jaú", city)) %>%
+    mutate(date = as.Date(date)) %>% 
+    group_by(city) %>%
+    arrange(date) %>% 
+    mutate(deaths = deaths - lag(deaths)) %>% 
+    select(city, date, deaths) %>%
+    ggplot(aes(date, deaths), fill = city) +
+    geom_point() +
+    geom_smooth() +
+    facet_wrap(city ~ ., nrow = 2)
+  
+p
+
 w_ = 15
 h_ = 10
 
@@ -276,30 +338,5 @@ ggsave(l, filename = "./img/deaths_new_brazil.png", width = w_, height = h_)
 ggsave(g, filename = "./img/mortality_total.png", width = w_, height = h_)
 ggsave(i, filename = "./img/mortality_detail.png", width = w_, height = h_)
 ggsave(j, filename = "./img/mortality_brazil.png", width = w_, height = h_)
-
-
-# Cities --------------------
-
-cities = read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") 
-
-cities %>% 
-        filter(state %in% c("SP","PR", "RJ")) %>%
-        filter(grepl("Janeiro|São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel", city)) %>%
-        #filter(grepl("Janeiro|São Paulo|Jundiaí|Campinas|Valinhos|Vinhedo|Itu|Itupeva|Sorocaba|Osasco|Barueri|Franco da Rocha", city)) %>%
-        group_by(city) %>%
-        arrange(date, .by_group = TRUE) %>%
-        summarise(date = last(date),
-                  deaths = last(deaths),
-                  totalCases = last(totalCases),
-                  mortality = deaths / totalCases,
-                  cases_per_100k = last(totalCases_per_100k_inhabitants),
-                  deaths_per_100k = last(deaths_per_100k_inhabitants)) %>%
-        arrange(-deaths_per_100k) %>% View
-
-cities %>% 
-  filter(grepl("São Paulo/SP", city)) %>%
-  mutate(date = as.Date(date)) %>%
-  arrange(date) %>% 
-  ggplot(aes(date, deaths)) +
-  geom_point()
-
+ggsave(o, filename = "./img/cities_capital.png", width = w_, height = h_)
+ggsave(p, filename = "./img/cities.png", width = w_, height = h_)
