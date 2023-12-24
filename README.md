@@ -1,51 +1,47 @@
-# Goals
   
-* Track Covid-19 evolution (confirmed cases, deaths and mortality rates). 
+## Covid-19 evolution
 
-* Compare relevant countries with Brazil and its states
+Goals:
 
-* Compare numbers from Sao Paulo city and surrounding cities.
+- Track confirmed cases, deaths and mortality rates. 
+- Compare numbers from Brazil and other countries.
+- Compare numbers from some cities in Brazil.
 
-<br/><br/>
-
-Data Sources: Johns Hopkins University and Brazilian Ministry of Health
-
-Updated until **May 29, 2020**
+Data Sources: Johns Hopkins University and Brazilian Ministry of Health (Updated until **May 29, 2020**)
 
 Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
         
     
-# Confirmed
+## Confirmed
 
-![](img/confirmed_total.png) 
+<img src="img/confirmed_total.png" width="800">
 
-![](img/confirmed_detail.png)
+<img src="img/confirmed_detail.png" width="800">
 
-![](img/confirmed_compare.png) 
+<img src="img/confirmed_compare.png" width="800">
 
-# Deaths
+## Deaths
 
-![](img/deaths_total.png) 
+<img src="img/deaths_total.png" width="800">
 
-![](img/deaths_detail.png)
+<img src="img/deaths_detail.png" width="800">
 
-![](img/deaths_compare.png) 
+<img src="img/deaths_compare.png" width="800">
 
-![](img/deaths_new.png)
+<img src="img/deaths_new.png" width="800">
 
-![](img/deaths_new_brazil.png) 
+<img src="img/deaths_new_brazil.png" width="800">
 
-# Mortality Rate (Deaths / Cases)
+## Mortality Rate (Deaths / Cases)
 
-![](img/mortality_total.png) 
+<img src="img/mortality_total.png" width="800">
 
-![](img/mortality_detail.png)
+<img src="img/mortality_detail.png" width="800">
 
-![](img/mortality_brazil.png)
+<img src="img/mortality_brazil.png" width="800">
 
-# Cities
+## Cities
 
-![](img/cities_capital.png) 
+<img src="img/cities_capital.png" width="800">
 
-
-![](img/cities.png) 
+<img src="img/cities.png" width="800">
