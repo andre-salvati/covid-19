@@ -1,7 +1,3 @@
-
-# Mapa covid
-# https://juntoscontraocovid.org/map.html
-
 library(tidyverse)
 library(readxl)
 library(lubridate)
@@ -10,18 +6,11 @@ library(janitor)
 library(googledrive)
 library(randomcoloR)
 library(gghighlight)
-library(coronabr)
 
-
-setwd("~/Desktop/covid_19")
+setwd("~/Desktop/workspace/git/covid_19")
 options("scipen"=100, digits = 4)
 texto45 = theme(axis.text.x=element_text(angle=45, hjust=1))
-theme_set(theme_minimal())
-
-# install.packages("devtools") 
-# devtools::install_github(repo = "paternogbc/covid19br")
-# library(covid19br)
-# unique(covid_states$date)
+theme_set(theme_bw())
 
 my_blob =  list(
   geom_point(),
@@ -32,53 +21,35 @@ my_blob =  list(
 )
 
 my_caption =  list(theme(plot.caption=element_text(hjust = 0)),
-                   labs(caption = "Sources: Johns Hopkins University and Brazilian Ministry of Health"))
+                   labs(caption = "Sources: Johns Hopkins University and Ministério da Saúde do Brasil"))
 
 
-# Ingestion Ministry of Health ------------------
+# Ingestion Ministério da Saúde ------------------
 
-dados <- get_corona_br(by_uf = TRUE)
+file = "./data/ministerio_da_saude.xlsx"
+confirmed = read_excel(file, sheet = "confirmed", col_names = TRUE) %>%
+              gather("...1", valor, -"...2", -"...1") %>%
+              rename(location = "...2", date = "...1", total= valor) %>%
+              mutate(campo = "total_cases")
+# str(confirmed)
 
-brasil = dados %>% filter(place_type == "state") %>% 
-          select(location = state, date, total_cases = confirmed, total_deaths = deaths) %>%
-          mutate(source = "ministry")
+deaths = read_excel(file, sheet = "deaths", col_names = TRUE) %>%
+         gather("...1", valor, -"...2", -"...1") %>%
+         rename(location = "...2", date = "...1", total= valor) %>%
+         mutate(campo = "total_deaths")
+# str(deaths)
 
-sort(unique(brasil$date))
+brazil = rbind(confirmed, deaths) %>% spread(campo, total) %>%
+         mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
+         filter(!is.na(total_cases)) %>%
+         mutate(source = "ministry")
 
-brasil %>% arrange(date) %>% tail(30)
-
-
-
-# minha_planilha = "1L1CnyeKA8ZJprzFCa3ZiRIzcP44mahmcG4M_hnlbMFQ"
-# arquivo = "./data/ministry_of_health.xlsx"
-# 
-# drive_download(as_id(minha_planilha), path = arquivo, overwrite = TRUE)
-# confirmados = read_excel(arquivo, sheet = "confirmed", col_names = TRUE) %>%
-#               gather("...1", valor, -"...2", -"...1") %>%
-#               rename(location = "...2", date = "...1", total= valor) %>%
-#               mutate(campo = "total_cases")
-# str(confirmados)
-# 
-# obitos = read_excel(arquivo, sheet = "deaths", col_names = TRUE) %>%
-#          gather("...1", valor, -"...2", -"...1") %>%
-#          rename(location = "...2", date = "...1", total= valor) %>%
-#          mutate(campo = "total_deaths")
-# str(obitos)
-# 
-# brasil = rbind(confirmados, obitos) %>% spread(campo, total) %>%
-#          mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>%
-#          filter(!is.na(total_cases)) %>%
-#          mutate(source = "ministry")
-# 
-# unique((brasil$date))
-# 
-# brasil %>% filter(location == "SP") %>% tail
-# 
-
+brazil %>% filter(location == "SP") %>% tail
+ 
 
 # Ingestion Johns Hopkins --------
 
-mundo_obitos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv", 
+world_deaths = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv", 
                         check.names=FALSE, stringsAsFactors = FALSE) %>%
                rename(location = `Country/Region`) %>%
                mutate(Lat = NULL, 
@@ -91,7 +62,7 @@ mundo_obitos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-
                       campo = "total_deaths") %>%
                ungroup
 
-mundo_casos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", 
+world_cases = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", 
                        check.names=FALSE) %>%
               rename(location = `Country/Region`) %>%
               mutate(Lat = NULL, 
@@ -105,222 +76,188 @@ mundo_casos = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-1
               ungroup
 
 
-mundo = rbind(mundo_casos, mundo_obitos) %>% 
+world = rbind(world_cases, world_deaths) %>% 
         mutate(source = "university") %>%
         spread(campo, total) %>% 
-        rbind(brasil %>% arrange(date))
+        rbind(brazil %>% arrange(date))
 
-#View(mundo)
+world %>% filter(location == "Brazil") %>% arrange(date) %>% tail
+world %>% filter(location == "SP") %>% arrange(date) %>% tail
 
-mundo %>% filter(location == "Brazil") %>% arrange(date) %>% tail
-mundo %>% filter(location == "SP") %>% arrange(date) %>% tail
-
-sort(unique(mundo$date))
-sort(unique(mundo$location))
+sort(unique(world$date))
+sort(unique(world$location))
 
 log_scale = scale_y_continuous(trans='log10', labels = scales::comma)
 
-countries = "Brazil|SP|RJ|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|Australia|US|Mexico|India|Japan|Korea|Turkey|Russia"
+countries = "Brazil|SP|RJ|Portugal|Italy|Spain|Iran|China|France|United Kingdom|Argentina|Colombia|Chile|US|Mexico|India|Turkey|Russia"
 #countries = "Switzerland|Sweden|Luxembourg|Finland|Denmark|Germany"
 #countries = "Brazil|SP|RJ|United Kingdom|Australia|US|Canada|Belgium|Switzerland|Netherlands"
 
 
 # Confirmed ------------------
 
-a = mundo %>% filter(source == "university") %>% 
-          group_by(date) %>%
-          summarise(total_cases = sum(total_cases)) %>%
-          ggplot(aes(date, total_cases)) +
-          geom_point() +
-          geom_smooth(se = FALSE) + 
-          labs(title = "Confirmed cases (global)", y = "Confirmed") +
-          my_caption
+a = world %>% filter(source == "university") %>% 
+       group_by(date) %>%
+       summarise(total_cases = sum(total_cases)) %>%
+       ggplot(aes(date, total_cases)) +
+       geom_point() +
+       geom_smooth(se = FALSE) + 
+       labs(title = "Confirmed cases (global)", y = "Confirmed") +
+       my_caption
 
 a
 
-b = mundo %>% filter(grepl(countries, location)) %>%
-          filter(total_cases > 100) %>%
-          ggplot(aes(date, total_cases, color = location)) +
-          my_blob +
-          log_scale +
-          labs(title = "Confirmed cases (by country/states)", y = "Confirmed (logarithmic scale)")  +
-          my_caption
+b = world %>% filter(grepl(countries, location)) %>%
+       filter(total_cases > 100) %>%
+       ggplot(aes(date, total_cases, color = location)) +
+       my_blob +
+       log_scale +
+       labs(title = "Confirmed cases (by country/states)", y = "Confirmed (logarithmic scale)")  +
+       my_caption
 
 b
 
 
-c = mundo %>% filter(grepl(countries, location)) %>%
-          filter(total_cases > 200) %>%
-          group_by(location) %>% 
-          mutate(dia = row_number()) %>%
-          filter(dia < 100) %>%
-          ggplot(aes(dia, total_cases, color = location)) +
-          my_blob +
-          log_scale +
-          #coord_cartesian(xlim = c(0,30)) +
-          labs(title = "Confirmed cases (D = 0 when cases > 100)", x = "D (Day)", y = "Confirmed (logarithmic scale)") +
-          my_caption
+c = world %>% filter(grepl(countries, location)) %>%
+       filter(total_cases > 200) %>%
+       group_by(location) %>% 
+       mutate(dia = row_number()) %>%
+       filter(dia < 100) %>%
+       ggplot(aes(dia, total_cases, color = location)) +
+       my_blob +
+       log_scale +
+       #coord_cartesian(xlim = c(0,30)) +
+       labs(title = "Confirmed cases (D = 0 when cases > 100)", x = "D (Day)", y = "Confirmed (logarithmic scale)") +
+       my_caption
 
 c
 
 
 # Deaths ------------------
 
-d = mundo %>%
-        filter(source == "university") %>% 
-        group_by(date) %>%
-        summarise(total_deaths = sum(total_deaths)) %>%
-        ggplot(aes(date, total_deaths)) +
-        geom_point() +
-        geom_smooth(se = FALSE) + 
-        labs(title = "Death cases (global)", y = "Deaths") +
-        my_caption
+d = world %>%
+       filter(source == "university") %>% 
+       group_by(date) %>%
+       summarise(total_deaths = sum(total_deaths)) %>%
+       ggplot(aes(date, total_deaths)) +
+       geom_point() +
+       geom_smooth(se = FALSE) + 
+       labs(title = "Death cases (global)", y = "Deaths") +
+       my_caption
 
 d
           
-e = mundo %>% filter(date > as.Date("2020-02-15")) %>%
-          filter(total_deaths > 5) %>%
-          filter(grepl(countries, location)) %>% 
-          ggplot(aes(date, total_deaths, color = location)) +
-          my_blob +
-          log_scale +
-          labs(title = "Death cases (by country/state)", y = "Deaths (logarithmic scale)") +
-          my_caption
+e = world %>% filter(date > as.Date("2020-02-15")) %>%
+       filter(total_deaths > 5) %>%
+       filter(grepl(countries, location)) %>% 
+       ggplot(aes(date, total_deaths, color = location)) +
+       my_blob +
+       log_scale +
+       labs(title = "Death cases (by country/state)", y = "Deaths (logarithmic scale)") +
+       my_caption
 
 e
 
 
-f = mundo %>% #filter(grepl(countries, location)) %>%
-          filter(total_deaths > 10000) %>%
-          group_by(location) %>%
-          mutate(dia = row_number()) %>%
-          filter(dia < 70) %>%
-          ggplot(aes(dia, total_deaths, color = location)) +
-          my_blob +
-          log_scale +
-          #coord_cartesian(xlim=c(0,20)) +
-          labs(title = "Death cases (D = 0 when cases > 10000)", x = "D (Day)", y = "Deaths (logarithmic scale)") +
-          my_caption
+f = world %>% #filter(grepl(countries, location)) %>%
+       filter(total_deaths > 10000) %>%
+       group_by(location) %>%
+       mutate(dia = row_number()) %>%
+       filter(dia < 70) %>%
+       ggplot(aes(dia, total_deaths, color = location)) +
+       my_blob +
+       log_scale +
+       #coord_cartesian(xlim=c(0,20)) +
+       labs(title = "Death cases (D = 0 when cases > 10000)", x = "D (Day)", y = "Deaths (logarithmic scale)") +
+       my_caption
 
 f
 
-k = mundo %>% filter(grepl(countries, location)) %>%
-          group_by(location) %>%
-          mutate(deaths = total_deaths - lag(total_deaths)) %>% 
-          ggplot(aes(date, deaths, color = location)) +
-          my_blob +
-          log_scale +
-          labs(title = "New death cases", y = "Deaths (logarithmic scale)") +
-          my_caption
-
-k
-
-l = mundo %>% filter(source == "ministry") %>% 
-          filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR|MA", location)) %>%
-          #arrange(location) %>% View
-          group_by(location) %>% 
-          mutate(deaths = total_deaths - lag(total_deaths)) %>% 
-          ggplot(aes(date, deaths, color = location)) +
-          my_blob +
-          log_scale +
-          labs(title = "New death cases (Brazil)", y = "Deaths (logarithmic scale)") +
-          my_caption
+l = world %>% filter(source == "ministry") %>% 
+       filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|BR|MA", location)) %>%
+       #arrange(location) %>% View
+       group_by(location) %>% 
+       mutate(deaths = total_deaths - lag(total_deaths)) %>% 
+       ggplot(aes(date, deaths, color = location)) +
+       my_blob +
+       log_scale +
+       labs(title = "New death cases (Brazil)", y = "Deaths (logarithmic scale)") +
+       my_caption
 
 l
 
 # Mortality Rate ------------------
 
-g = mundo %>% filter(source == "university") %>%  
-          group_by(date) %>%
-          summarise(total_deaths = sum(total_deaths, na.rm = TRUE), total_cases = sum(total_cases, na.rm = TRUE)) %>%
-          mutate(mortality = (total_deaths / total_cases)*100) %>% 
-          filter(!is.na(mortality)) %>%
-          ggplot(aes(date, mortality)) +
-          geom_point() +
-          geom_smooth(se = FALSE) +
-          labs(title = "Mortality rate (global)", y = "Mortality rate (%)") +
-          my_caption
+g = world %>% filter(source == "university") %>%  
+       group_by(date) %>%
+       summarise(total_deaths = sum(total_deaths, na.rm = TRUE), total_cases = sum(total_cases, na.rm = TRUE)) %>%
+       mutate(mortality = (total_deaths / total_cases)*100) %>% 
+       filter(!is.na(mortality)) %>%
+       ggplot(aes(date, mortality)) +
+       geom_point() +
+       geom_smooth(se = FALSE) +
+       labs(title = "Mortality rate (global)", y = "Mortality rate (%)") +
+       my_caption
 
 g
 
-i = mundo %>% filter(date > as.Date("2020-03-10")) %>%
-          filter(grepl(countries, location)) %>%
-          mutate(mortality = (total_deaths / total_cases) *100) %>% 
-          filter(!is.na(mortality)) %>%
-          ggplot(aes(date, mortality, color = location)) +
-          my_blob +
-          labs(title = "Mortality rate (by country/state)", y = "Mortality rate (%)") +
-          my_caption
+i = world %>% filter(date > as.Date("2020-03-10")) %>%
+       filter(grepl(countries, location)) %>%
+       mutate(mortality = (total_deaths / total_cases) *100) %>% 
+       filter(!is.na(mortality)) %>%
+       ggplot(aes(date, mortality, color = location)) +
+       my_blob +
+       labs(title = "Mortality rate (by country/state)", y = "Mortality rate (%)") +
+       my_caption
 
 i
 
 
-j = mundo %>% filter(date > as.Date("2020-03-10")) %>%
-  filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|MA", location)) %>%
-  mutate(mortality = (total_deaths / total_cases) *100) %>% 
-  filter(!is.na(mortality)) %>%
-  ggplot(aes(date, mortality, color = location)) +
-  my_blob +
-  labs(title = "Mortality rate (Brazil)", y = "Mortality rate (%)") +
-  my_caption
+j = world %>% filter(date > as.Date("2020-03-10")) %>%
+       filter(grepl("SP|MG|RJ|RS|PR|BA|RJ|AM|CE|PE|MA", location)) %>%
+       mutate(mortality = (total_deaths / total_cases) *100) %>% 
+       filter(!is.na(mortality)) %>%
+       ggplot(aes(date, mortality, color = location)) +
+       my_blob +
+       labs(title = "Mortality rate (Brazil)", y = "Mortality rate (%)") +
+       my_caption
 
 j
      
 
-
 # Cities --------------------
 
-cities = read.csv("https://raw.githubusercontent.com/wcota/covid19br/master/cases-brazil-cities-time.csv") 
-
-cities %>% 
-        filter(state %in% c("SP","PR", "RJ")) %>%
-        filter(grepl("Janeiro|São Paulo|Piracicaba|Itirapina|São Carlos|Rio Claro|Jundiaí|São Pedro|Campinas|Limeira|Brotas|Jaú|Cascavel|Osasco|Campinas|São Bernardo|Diadema|Sorocaba|Jundiaí|Guarulhos|Santo André|São Caetano|Santos", city)) %>%
-        #filter(grepl("Janeiro|São Paulo|Jundiaí|Campinas|Valinhos|Vinhedo|Itu|Itupeva|Sorocaba|Osasco|Barueri|Franco da Rocha", city)) %>%
-        group_by(city) %>%
-        arrange(date, .by_group = TRUE) %>%
-        summarise(date = last(date),
-                  deaths = last(deaths),
-                  totalCases = last(totalCases),
-                  mortality = deaths / totalCases,
-                  cases_per_100k = last(totalCases_per_100k_inhabitants),
-                  deaths_per_100k = last(deaths_per_100k_inhabitants)) %>%
-        arrange(-deaths_per_100k) %>% View
-
-
-cities %>% filter(date == "2020-05-25") %>% 
-           filter(state %in% c("SP")) %>%
-           select(city, deaths) %>%
-           arrange(-deaths) %>% head
+cities = read.csv("./data/cases-brazil-cities-time.csv") 
 
 sort(unique(cities$city))
 
 o = cities %>%
-  filter(city %in% c("São Paulo/SP", "Rio de Janeiro/RJ")) %>%
-  mutate(date = as.Date(date)) %>% 
-  group_by(city) %>%
-  arrange(date) %>% 
-  mutate(deaths = deaths - lag(deaths)) %>% 
-  select(city, date, deaths) %>%
-  ggplot(aes(date, deaths), fill = city) +
-  geom_point() +
-  geom_smooth() +
-  facet_wrap(city ~ ., ncol = 2)
+       filter(city %in% c("São Paulo/SP", "Rio de Janeiro/RJ")) %>%
+       mutate(date = as.Date(date)) %>% 
+       group_by(city) %>%
+       arrange(date) %>% 
+       mutate(deaths = deaths - lag(deaths)) %>% 
+       select(city, date, deaths) %>%
+       ggplot(aes(date, deaths), fill = city) +
+       geom_point() +
+       geom_smooth() +
+       facet_wrap(city ~ ., ncol = 2)
 
 o
 
 p = cities %>%
-    filter(state %in% c("SP")) %>%
-    filter(grepl("Osasco|Campinas|São Bernardo|Diadema|Sorocaba|Jundiaí|Guarulhos|Santo André|São Caetano|Santos", city)) %>%
-    #filter(grepl("Sorocaba|Bauru|Limeira|Campinas|Piracicaba|São Carlos|Rio Claro|Jaú", city)) %>%
-    mutate(date = as.Date(date)) %>% 
-    group_by(city) %>%
-    arrange(date) %>% 
-    mutate(deaths = deaths - lag(deaths)) %>% 
-    select(city, date, deaths) %>%
-    ggplot(aes(date, deaths), fill = city) +
-    geom_point() +
-    geom_smooth() +
-    facet_wrap(city ~ ., nrow = 2)
+       filter(state %in% c("SP")) %>%
+       filter(grepl("Osasco|Campinas|São Bernardo|Diadema|Sorocaba|Jundiaí|Guarulhos|Santo André|São Caetano|Santos", city)) %>%
+       #filter(grepl("Sorocaba|Bauru|Limeira|Campinas|Piracicaba|São Carlos|Rio Claro|Jaú", city)) %>%
+       mutate(date = as.Date(date)) %>% 
+       group_by(city) %>%
+       arrange(date) %>% 
+       mutate(deaths = deaths - lag(deaths)) %>% 
+       select(city, date, deaths) %>%
+       ggplot(aes(date, deaths), fill = city) +
+       geom_point() +
+       geom_smooth() +
+       facet_wrap(city ~ ., nrow = 2)
   
 p
 

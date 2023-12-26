@@ -7,7 +7,7 @@ Goals:
 - Compare numbers from Brazil and other countries.
 - Compare numbers from some cities in Brazil.
 
-Data Sources: Johns Hopkins University and Brazilian Ministry of Health (Updated until **May 29, 2020**)
+Data Sources: Johns Hopkins University and Brazilian Ministry of Health
 
 Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
         
@@ -27,8 +27,6 @@ Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for
 <img src="img/deaths_detail.png" width="800">
 
 <img src="img/deaths_compare.png" width="800">
-
-<img src="img/deaths_new.png" width="800">
 
 <img src="img/deaths_new_brazil.png" width="800">
 
