@@ -4,12 +4,12 @@
 Goals:
 
 - Track confirmed cases, deaths and mortality rates. 
-- Compare numbers from Brazil and other countries.
-- Compare numbers from some cities in Brazil.
+- Contrast numerical data between Brazil and other countries.
+- Contrast numerical data between cities in Brazil.
 
-Data Sources: Johns Hopkins University and Brazilian Ministry of Health
+Data Sources: Johns Hopkins University and Ministério da Saúde do Brasil.
 
-Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis
+Please, refer to [this dashboard](https://jgassen.shinyapps.io/tidycovid19/) for a "more dynamic" exploratory analysis.
         
     
 ## Confirmed
